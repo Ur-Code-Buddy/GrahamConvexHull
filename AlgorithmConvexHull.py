@@ -1,4 +1,5 @@
 import tkinter as tk
+import random
 
 
 def getConvexHull(points):
@@ -24,27 +25,6 @@ def getConvexHull(points):
     return hull
 
 
-def rescalePoints(points, canvasWidth, canvasHeight):
-    def getMinX(p):
-        return p[0]
-
-    def getMaxX(p):
-        return p[0]
-
-    def getMinY(p):
-        return p[1]
-
-    def getMaxY(p):
-        return p[1]
-
-    minX = min(points, key= getMinX)[0]
-    maxX = max(points, key= getMaxX)[0]
-    minY = min(points, key= getMinY)[1]
-    maxY = max(points, key= getMaxY)[1]
-    scaleX = canvasWidth / (maxX - minX)
-    scaleY = canvasHeight / (maxY - minY)
-    return [(int((x - minX) * scaleX), int((y - minY) * scaleY)) for x, y in points]
-
 
 def drawPoints(canvas, points, color):
     for x, y in points:
@@ -58,30 +38,70 @@ def drawLines(canvas, points, color):
 
 
 def displayConvexHull(points):
-    points = rescalePoints(points, 400, 400)
-
 
     hull = getConvexHull(points)
 
-    #GUI
+
+    min_x = points[0][0]
+    for p in points:
+        if p[0] < min_x:
+            min_x = p[0]
+
+    max_x = points[0][0]
+    for p in points:
+        if p[0] > max_x:
+            max_x = p[0]
+
+    min_y = points[0][1]
+    for p in points:
+        if p[1] < min_y:
+            min_y = p[1]
+
+    max_y = points[0][1]
+    for p in points:
+        if p[1] > max_y:
+            max_y = p[1]
+
+    width = max_x - min_x
+    height = max_y - min_y
+    padding = max(width, height) * 0.1
+    canvas_width = int((width + padding * 2) * 10)
+    canvas_height = int((height + padding * 2) * 10)
+    scale = 5
+
     root = tk.Tk()
     root.title("Convex Hull")
-    canvas = tk.Canvas(root, width=500, height=500)
+    canvas = tk.Canvas(root, width=canvas_width, height=canvas_height)
     canvas.pack()
 
+    for x, y in points:
+        canvas.create_oval((x - min_x + padding) * scale - 3, (y - min_y + padding) * scale - 3,
+                            (x - min_x + padding) * scale + 3, (y - min_y + padding) * scale + 3, fill="blue")
 
-    drawPoints(canvas, points, "blue")
-    drawLines(canvas, hull, "red")
+    for i in range(len(hull) - 1):
+        canvas.create_line((hull[i][0] - min_x + padding) * scale, (hull[i][1] - min_y + padding) * scale,
+                           (hull[i+1][0] - min_x + padding) * scale, (hull[i+1][1] - min_y + padding) * scale,
+                           fill="red")
 
+    canvas.create_line((hull[-1][0] - min_x + padding) * scale, (hull[-1][1] - min_y + padding) * scale,
+                       (hull[0][0] - min_x + padding) * scale, (hull[0][1] - min_y + padding) * scale,
+                       fill="red")
 
     root.mainloop()
 
 
+
 def main():
-    n = int(input("Enter set size: "))
+
+    #n = int(input("Enter set size: "))
+    n = random.randint(4,30)
+    print(n)
     points = []
     for i in range(n):
-        x, y = map(float, input("Enter point %d: " % (i + 1)).split())
+        x = random.randint(5,100)
+        y =  random.randint(5,100)
+        print("point:",i,"x:",x,"y",y)
+        #x, y = map(float, input("Enter point %d: " % (i + 1)).split())
         points.append((x, y))
 
     displayConvexHull(points)
